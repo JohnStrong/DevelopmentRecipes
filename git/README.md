@@ -2,6 +2,13 @@
 
 A collection of useful git commands and configurations picked up along the way — learned from Kiro, AI tools, and daily development. Use as you like! 
 
+## Table of Contents
+
+- [Pre-push Hooks](#pre-push-hooks)
+  - [Block non-merge commits to the master/main remote repository branch](#block-non-merge-commits-to-the-mastermain-remote-repository-branch)
+- [SSH](#ssh)
+  - [Use a specific SSH key for a single repo](#use-a-specific-ssh-key-for-a-single-repo)
+
 ## Pre-push Hooks
 
 ### Block non-merge commits to the master/main remote repository branch
