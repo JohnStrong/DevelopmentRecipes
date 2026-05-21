@@ -7,3 +7,8 @@ A personal collection of recipes, cookbooks, and reusable patterns for various t
 | Folder | Description |
 |--------|-------------|
 | `git/` | Handy git commands, configurations, and workflows for managing repos, SSH keys, and multi-account setups. |
+
+
+## License
+
+This project is released into the public domain under the [Unlicense](LICENSE). You're free to copy, modify, fork, or use any of it — no attribution required, no strings attached.
