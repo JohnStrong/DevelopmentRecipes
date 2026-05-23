@@ -6,6 +6,8 @@ A collection of useful git commands and configurations picked up along the way �
 
 - [Pre-push Hooks](#pre-push-hooks)
   - [Block non-merge commits to the master/main remote repository branch](#block-non-merge-commits-to-the-mastermain-remote-repository-branch)
+- [Merging](#merging)
+  - [Merge a feature branch without fast-forwarding](#merge-a-feature-branch-without-fast-forwarding)
 - [SSH](#ssh)
   - [Use a specific SSH key for a single repo](#use-a-specific-ssh-key-for-a-single-repo)
 
@@ -138,6 +140,66 @@ git push --no-verify origin main
 ```
 
 Use sparingly — the hook exists for a reason.
+
+## Merging
+
+### Merge a feature branch without fast-forwarding
+
+```bash
+git checkout main
+git merge --no-ff <feature-branch>
+```
+
+**What it does:**
+
+- `--no-ff` stands for "no fast-forward". Without it, git will fast-forward the branch pointer if the history is linear — meaning no merge commit is created and the individual feature commits land directly on `main`.
+- With `--no-ff`, git always creates a dedicated merge commit with two parents, even when a fast-forward would be possible. This preserves the fact that a group of commits came from a feature branch.
+
+**When it's useful:**
+
+- You want a clean, readable history on `main` where each feature appears as a single merge commit.
+- You're working with a pre-push hook (like the one above) that only allows merge commits on protected branches.
+- You want to be able to revert an entire feature in one step with `git revert -m 1 <merge-commit>`.
+- Your team uses a feature-branch workflow and you want the branch topology visible in `git log --graph`.
+
+**Typical workflow:**
+
+```bash
+# 1. Create and work on a feature branch
+git checkout -b feature/my-thing
+# ... make commits ...
+
+# 2. Switch back to main and merge with a merge commit
+git checkout main
+git merge --no-ff feature/my-thing
+
+# 3. Push to remote
+git push origin main
+
+# 4. Clean up the feature branch (optional)
+git branch -d feature/my-thing
+```
+
+**What the history looks like:**
+
+```
+*   abc1234 Merge branch 'feature/my-thing' into main
+|\
+| * def5678 Add thing part 2
+| * ghi9012 Add thing part 1
+|/
+* jkl3456 Previous commit on main
+```
+
+Without `--no-ff` the two feature commits would appear inline on `main` with no indication they were ever a separate branch.
+
+**Set it as the default for a repo:**
+
+```bash
+git config --local merge.ff false
+```
+
+This makes every `git merge` in the repo behave as `--no-ff` without needing to type the flag each time.
 
 ## SSH
 
