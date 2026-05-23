@@ -8,6 +8,7 @@ A collection of useful git commands and configurations picked up along the way �
   - [Block non-merge commits to the master/main remote repository branch](#block-non-merge-commits-to-the-mastermain-remote-repository-branch)
 - [Merging](#merging)
   - [Merge a feature branch without fast-forwarding](#merge-a-feature-branch-without-fast-forwarding)
+  - [Squash a feature branch into a single commit](#squash-a-feature-branch-into-a-single-commit)
 - [SSH](#ssh)
   - [Use a specific SSH key for a single repo](#use-a-specific-ssh-key-for-a-single-repo)
 
@@ -200,6 +201,67 @@ git config --local merge.ff false
 ```
 
 This makes every `git merge` in the repo behave as `--no-ff` without needing to type the flag each time.
+
+### Squash a feature branch into a single commit
+
+```bash
+git checkout main
+git merge --squash <feature-branch>
+git commit -m "feat: add my thing"
+```
+
+**What it does:**
+
+- `--squash` takes all the commits from `<feature-branch>` and collapses their changes into the working tree and index of the current branch — but does **not** create a commit automatically.
+- You then write a single, clean commit message that represents the entire feature.
+- Unlike `--no-ff`, the result is **not** a merge commit — it has only one parent, so the feature branch history is not preserved in the graph.
+
+**When it's useful:**
+
+- Your feature branch has lots of noisy WIP commits ("fix typo", "try again", "actually fix it") that you don't want polluting `main`'s history.
+- You want `main` to read as a clean, linear sequence of meaningful commits — one per feature or fix.
+- You're contributing to a project that requires a single commit per PR/CR.
+- You want the simplest possible history to `git bisect` or `git log` through later.
+
+**Typical workflow:**
+
+```bash
+# 1. Work freely on a feature branch with as many commits as you like
+git checkout -b feature/my-thing
+# ... make commits ...
+
+# 2. Switch to main and squash everything down
+git checkout main
+git merge --squash feature/my-thing
+
+# 3. Write one clean commit message for the whole feature
+git commit -m "feat: add my thing"
+
+# 4. Push to remote
+git push origin main
+
+# 5. Clean up the feature branch (optional)
+git branch -d feature/my-thing
+```
+
+**What the history looks like:**
+
+```
+* abc1234 feat: add my thing   ← single commit, all changes included
+* jkl3456 Previous commit on main
+```
+
+Compare this to `--no-ff` which would show the branch topology. With `--squash` the branch is invisible in history — just one tidy commit.
+
+**Key difference from `--no-ff`:**
+
+| | `--no-ff` | `--squash` |
+|---|---|---|
+| Creates a merge commit | Yes (2 parents) | No (1 parent) |
+| Preserves branch history | Yes | No |
+| Commit message | Auto-generated | You write it |
+| Revert entire feature | `git revert -m 1 <sha>` | `git revert <sha>` |
+| Best for | Visible feature grouping | Clean linear history |
 
 ## SSH
 
